@@ -2,7 +2,7 @@
 
 ## 1. High latency P95
 - Severity: P2
-- Trigger: `latency_p95_ms > 5000 for 30m`
+- Trigger: `latency_p95_ms > 2000 for 10m` (cảnh báo sớm, dưới ngưỡng SLO 3000ms)
 - Impact: tail latency breaches SLO
 - First checks:
   1. Open top slow traces in the last 1h
@@ -28,7 +28,7 @@
 
 ## 3. Cost budget spike
 - Severity: P2
-- Trigger: `hourly_cost_usd > 2x_baseline for 15m`
+- Trigger: `avg_cost_usd > 0.005 for 15m` (~2x baseline $0.0023/req)
 - Impact: burn rate exceeds budget
 - First checks:
   1. Split traces by feature and model

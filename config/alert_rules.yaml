@@ -1,19 +1,29 @@
+# Thresholds tuned against measured values (10 reqs/scenario, see docs/blueprint-template.md sec 4):
+#   baseline:  p95=156ms  avg_cost=$0.0023/req  error_rate=0%
+#   rag_slow:  p95=2666ms  -> fires high_latency_p95
+#   tool_fail: error_rate=100% -> fires high_error_rate
+#   cost_spike: avg_cost=$0.0088/req (~3.8x) -> fires cost_budget_spike
 alerts:
   - name: high_latency_p95
     severity: P2
-    condition: latency_p95_ms > 5000 for 30m
+    # Leading indicator: fire below the 3000ms SLO so we react before breaching it.
+    condition: latency_p95_ms > 2000 for 10m
     type: symptom-based
     owner: team-oncall
     runbook: docs/alerts.md#1-high-latency-p95
+    tested: "PASS - rag_slow drove p95 to 2666ms (baseline 156ms)"
   - name: high_error_rate
     severity: P1
     condition: error_rate_pct > 5 for 5m
     type: symptom-based
     owner: team-oncall
     runbook: docs/alerts.md#2-high-error-rate
+    tested: "PASS - tool_fail drove error_rate to 100% (baseline 0%)"
   - name: cost_budget_spike
     severity: P2
-    condition: hourly_cost_usd > 2x_baseline for 15m
+    # baseline avg_cost_usd ~= 0.0023/req; alert at >2x baseline.
+    condition: avg_cost_usd > 0.005 for 15m
     type: symptom-based
     owner: finops-owner
     runbook: docs/alerts.md#3-cost-budget-spike
+    tested: "PASS - cost_spike drove avg_cost to $0.0088/req (~3.8x baseline)"
